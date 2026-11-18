@@ -21,15 +21,22 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install Android SDK 36.1 & Accept Licenses
         run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "platforms;android-36.1" "platforms;android-36" "build-tools;36.0.0"
+          SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "Using SDK_ROOT=$SDK_ROOT"
+          SDKMANAGER=$(find "$SDK_ROOT/cmdline-tools" -name sdkmanager -type f 2>/dev/null | head -n 1)
+          if [ -z "$SDKMANAGER" ]; then
+            SDKMANAGER=$(command -v sdkmanager || true)
+          fi
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager not found under $SDK_ROOT"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          "$SDKMANAGER" --install "platforms;android-36.1" "platforms;android-36" "build-tools;36.0.0"
 
-      - name: Prepare debug keystore
+      - name: Prepare debug keystore & env
         run: |
           if [ -f debug.keystore.base64 ] && [ ! -f debug.keystore ]; then
             base64 -d debug.keystore.base64 > debug.keystore
@@ -39,14 +46,14 @@ jobs:
               -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 \
               -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
+          if [ ! -f .env.example ]; then
+            touch .env.example
+          fi
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
-
-      - name: Run Unit & Robolectric Tests
-        run: gradle :app:testDebugUnitTest --stacktrace
 
       - name: Build Debug APK
         run: gradle assembleDebug --stacktrace
@@ -56,3 +63,6 @@ jobs:
         with:
           name: baby-assistant-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+
+      - name: Run Unit & Robolectric Tests
+        run: gradle :app:testDebugUnitTest --stacktrace

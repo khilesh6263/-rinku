@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Baby Assistant</string>
+    <string name="app_tagline">Voice-Controlled Call Assistant</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_test_lab">Test Lab</string>
+    <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
+    <string name="notification_channel_assistant_name">Baby Call Monitor</string>
+    <string name="notification_channel_assistant_desc">Active foreground notification while Baby monitors incoming calls for voice commands.</string>
+    <string name="notification_channel_call_alert_name">Incoming Call Voice Prompt</string>
+    <string name="notification_channel_call_alert_desc">Alerts when an incoming call arrives and Baby needs foreground activation to listen.</string>
+    <string name="action_listen_now">Listen Now</string>
+    <string name="action_stop_assistant">Stop</string>
+    <string name="cd_baby_orb">Baby voice assistant orb</string>
+    <string name="cd_mic_button">Activate microphone for voice command</string>
+    <string name="cd_back_button">Navigate back</string>
+    <string name="cd_setup_wizard">Open permission setup wizard</string>
+</resources>

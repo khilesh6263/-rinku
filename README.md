@@ -26,7 +26,7 @@ An Android Jetpack Compose application that lets users manage incoming calls han
 ## Setup & Build Instructions (Local / GitHub)
 
 ### Requirements
-- Android Studio Ladybug / Meerkat or newer (JDK 17+ / Android Gradle Plugin 9.x, Compile SDK 36, Min SDK 24)
+- Android Studio Ladybug / Meerkat or newer (JDK 21+ / Android Gradle Plugin 9.x, Compile SDK 36, Min SDK 24)
 - Android SDK Platform 36 & Build-Tools installed
 
 ### Build Debug APK via Gradle

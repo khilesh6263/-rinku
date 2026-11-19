@@ -3,8 +3,8 @@
   "version": "1.0",
   "minAndroid": "Android 7.0+ (API 24)",
   "packageId": "com.aistudio.babyvoice.xkmzqp",
-  "apkUrl": "https://github.com/khilesh6263/-babu/releases/latest/download/Baby-Assistant.apk",
-  "fallbackReleasesUrl": "https://github.com/khilesh6263/-babu/releases",
+  "apkUrl": "https://github.com/khilesh6263/-rinku/releases/latest/download/Baby-Assistant.apk",
+  "fallbackReleasesUrl": "https://github.com/khilesh6263/-rinku/releases",
   "apkSize": "Auto-updated on GitHub build",
   "sha256": "Generated automatically during GitHub Actions build",
   "updatedAt": "Latest release"

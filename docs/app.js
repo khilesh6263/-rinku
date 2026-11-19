@@ -139,8 +139,22 @@ function updateSimulation(stateKey) {
   if (text) text.textContent = state.text;
 }
 
-const DEFAULT_PUBLIC_APK_URL =
-  "https://github.com/khilesh6263/-babu/releases/latest/download/Baby-Assistant.apk";
+function detectGitHubRepo() {
+  const host = window.location.hostname.toLowerCase();
+  if (host.endsWith(".github.io")) {
+    const owner = host.slice(0, -".github.io".length);
+    const segments = window.location.pathname.split("/").filter(Boolean);
+    if (owner && segments.length > 0) {
+      return { owner, repo: segments[0] };
+    }
+  }
+  return { owner: "khilesh6263", repo: "-rinku" };
+}
+
+const DETECTED_REPO = detectGitHubRepo();
+const REPO_SLUG = `${DETECTED_REPO.owner}/${DETECTED_REPO.repo}`;
+const DEFAULT_RELEASES_URL = `https://github.com/${REPO_SLUG}/releases`;
+const DEFAULT_PUBLIC_APK_URL = `https://github.com/${REPO_SLUG}/releases/latest/download/Baby-Assistant.apk`;
 
 let resolvedApkDownloadUrl = DEFAULT_PUBLIC_APK_URL;
 
@@ -155,6 +169,26 @@ function resolveScannableApkUrl(rawHref) {
     }
   }
   return DEFAULT_PUBLIC_APK_URL;
+}
+
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return null;
+  const mb = bytes / (1024 * 1024);
+  return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`;
+}
+
+function formatDate(isoString) {
+  if (!isoString) return null;
+  try {
+    const d = new Date(isoString);
+    return d.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+  } catch (_) {
+    return null;
+  }
 }
 
 function renderApkQrCode(url) {
@@ -191,39 +225,142 @@ function renderApkQrCode(url) {
   container.appendChild(img);
 }
 
-async function loadReleaseInfo() {
-  renderApkQrCode(DEFAULT_PUBLIC_APK_URL);
+function applyDownloadMetadata({ apkUrl, releasesUrl, version, apkSize, updatedAt, sha256 }) {
+  const targetApkUrl = apkUrl || DEFAULT_PUBLIC_APK_URL;
+  const targetReleasesUrl = releasesUrl || DEFAULT_RELEASES_URL;
+  const isSameOriginLocal = !/^https?:\/\//i.test(targetApkUrl);
+
+  document.querySelectorAll("[data-apk-download]").forEach((link) => {
+    link.setAttribute("href", targetApkUrl);
+    if (isSameOriginLocal) {
+      link.setAttribute("download", "Baby-Assistant.apk");
+    } else {
+      link.removeAttribute("download");
+    }
+  });
+
+  document.querySelectorAll("[data-releases-link]").forEach((link) => {
+    link.setAttribute("href", targetReleasesUrl);
+  });
+
+  renderApkQrCode(resolveScannableApkUrl(targetApkUrl));
+
+  const versionEl = document.getElementById("spec-version");
+  const sizeEl = document.getElementById("spec-size");
+  const updatedEl = document.getElementById("spec-updated");
+  const shaEl = document.getElementById("spec-sha256");
+
+  if (versionEl && version) versionEl.textContent = version.startsWith("v") ? version : `v${version}`;
+  if (sizeEl && apkSize) sizeEl.textContent = apkSize;
+  if (updatedEl && updatedAt) updatedEl.textContent = updatedAt;
+  if (shaEl && sha256) {
+    shaEl.textContent = sha256.length > 24 ? `${sha256.slice(0, 24)}…` : sha256;
+    shaEl.title = sha256;
+  }
+}
+
+async function checkLocalApkExists(relativeUrl) {
+  if (window.location.protocol !== "http:" && window.location.protocol !== "https:") {
+    return false;
+  }
   try {
-    const res = await fetch("./downloads/release-info.json", { cache: "no-store" });
-    if (!res.ok) return;
-    const info = await res.json();
+    const res = await fetch(relativeUrl, { method: "HEAD", cache: "no-store" });
+    return res.ok;
+  } catch (_) {
+    return false;
+  }
+}
 
-    const apkHref = info.apkUrl || DEFAULT_PUBLIC_APK_URL;
-    document.querySelectorAll("[data-apk-download]").forEach((link) => {
-      link.setAttribute("href", apkHref);
+async function fetchLiveGitHubReleaseApk() {
+  try {
+    const apiRes = await fetch(`https://api.github.com/repos/${REPO_SLUG}/releases`, {
+      headers: { Accept: "application/vnd.github+json" },
+      cache: "no-store"
     });
-    renderApkQrCode(resolveScannableApkUrl(apkHref));
+    if (!apiRes.ok) return null;
+    const releases = await apiRes.json();
+    if (!Array.isArray(releases)) return null;
 
-    const releasesHref = info.fallbackReleasesUrl || "https://github.com/khilesh6263/-babu/releases";
-    document.querySelectorAll("[data-releases-link]").forEach((link) => {
-      link.setAttribute("href", releasesHref);
-    });
-
-    const versionEl = document.getElementById("spec-version");
-    const sizeEl = document.getElementById("spec-size");
-    const updatedEl = document.getElementById("spec-updated");
-    const shaEl = document.getElementById("spec-sha256");
-
-    if (versionEl && info.version) versionEl.textContent = `v${info.version}`;
-    if (sizeEl && info.apkSize) sizeEl.textContent = info.apkSize;
-    if (updatedEl && info.updatedAt) updatedEl.textContent = info.updatedAt;
-    if (shaEl && info.sha256) {
-      shaEl.textContent = info.sha256.length > 24 ? `${info.sha256.slice(0, 24)}…` : info.sha256;
-      shaEl.title = info.sha256;
+    for (const rel of releases) {
+      if (rel.draft) continue;
+      const assets = Array.isArray(rel.assets) ? rel.assets : [];
+      const apkAsset = assets.find(
+        (asset) =>
+          typeof asset.name === "string" &&
+          asset.name.toLowerCase().endsWith(".apk") &&
+          asset.browser_download_url
+      );
+      if (apkAsset) {
+        return {
+          apkUrl: apkAsset.browser_download_url,
+          releasesUrl: rel.html_url || DEFAULT_RELEASES_URL,
+          version: rel.tag_name && rel.tag_name !== "latest" ? rel.tag_name : "1.0",
+          apkSize: formatBytes(apkAsset.size),
+          updatedAt: formatDate(apkAsset.updated_at || rel.published_at)
+        };
+      }
     }
   } catch (_) {
-    // Keep default fallback GitHub Release link & QR code
+    // Ignore API network/rate-limit errors and keep fallback
   }
+  return null;
+}
+
+async function loadReleaseInfo() {
+  applyDownloadMetadata({
+    apkUrl: DEFAULT_PUBLIC_APK_URL,
+    releasesUrl: DEFAULT_RELEASES_URL
+  });
+
+  // 1. Check bundled release-info.json & same-origin APK (present on GitHub Actions Pages deploys)
+  let info = null;
+  try {
+    const res = await fetch("./downloads/release-info.json", { cache: "no-store" });
+    if (res.ok) {
+      info = await res.json();
+    }
+  } catch (_) {
+    // Ignore when opened locally
+  }
+
+  if (info && info.apkUrl && !/^https?:\/\//i.test(info.apkUrl)) {
+    const existsLocally = await checkLocalApkExists(info.apkUrl);
+    if (existsLocally) {
+      applyDownloadMetadata({
+        apkUrl: info.apkUrl,
+        releasesUrl: info.fallbackReleasesUrl || DEFAULT_RELEASES_URL,
+        version: info.version,
+        apkSize: info.apkSize,
+        updatedAt: info.updatedAt,
+        sha256: info.sha256
+      });
+      return;
+    }
+  }
+
+  // 2. Query live GitHub Releases API for this exact repository to guarantee a valid .apk URL (never 404)
+  const liveRelease = await fetchLiveGitHubReleaseApk();
+  if (liveRelease) {
+    applyDownloadMetadata({
+      apkUrl: liveRelease.apkUrl,
+      releasesUrl: liveRelease.releasesUrl,
+      version: liveRelease.version || info?.version,
+      apkSize: liveRelease.apkSize || info?.apkSize,
+      updatedAt: liveRelease.updatedAt || info?.updatedAt,
+      sha256: info?.sha256
+    });
+    return;
+  }
+
+  // 3. Fallback to detected repo's latest APK release URL
+  applyDownloadMetadata({
+    apkUrl: DEFAULT_PUBLIC_APK_URL,
+    releasesUrl: DEFAULT_RELEASES_URL,
+    version: info?.version,
+    apkSize: info?.apkSize,
+    updatedAt: info?.updatedAt,
+    sha256: info?.sha256
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {

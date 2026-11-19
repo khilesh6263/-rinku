@@ -98,28 +98,35 @@ jobs:
           EOF
 
       - name: Publish Public APK to GitHub Releases
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
         run: |
           if gh release view latest >/dev/null 2>&1; then
             gh release upload latest _site/downloads/Baby-Assistant.apk --clobber
+            gh release edit latest --latest
           else
             gh release create latest _site/downloads/Baby-Assistant.apk \
+              --latest \
               --title "Baby Assistant Latest APK" \
               --notes "Latest automated Android build of Baby Assistant (Hands-Free Voice Call Assistant with Auto-Mic on Incoming Call)."
           fi
 
+      - name: Setup Pages
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        continue-on-error: true
+        uses: actions/configure-pages@v5
+
       - name: Upload GitHub Pages Website Artifact
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
   deploy-pages:
     needs: build
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -129,3 +136,17 @@ jobs:
         id: deployment
         continue-on-error: true
         uses: actions/deploy-pages@v5
+
+      - name: Print Website & APK Download Links
+        run: |
+          SITE_URL="${{ steps.deployment.outputs.page_url }}"
+          if [ -z "$SITE_URL" ]; then
+            REPO_NAME="${GITHUB_REPOSITORY#*/}"
+            SITE_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO_NAME}/"
+          fi
+          {
+            echo "## Baby Assistant Public Links"
+            echo ""
+            echo "- **Public Download Website:** ${SITE_URL}"
+            echo "- **Direct APK Download:** https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/Baby-Assistant.apk"
+          } >> "$GITHUB_STEP_SUMMARY"

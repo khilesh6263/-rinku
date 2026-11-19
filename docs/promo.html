@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baby Assistant — WhatsApp Status Promo Video Studio</title>
+  <title>Baby Assistant — 1-Minute WhatsApp Status Promo Video Studio</title>
   <meta
     name="description"
-    content="Preview and download a 9:16 vertical WhatsApp Status advertisement video featuring our cartoon boy explaining how to download and use Baby Call Assistant."
+    content="Preview and download a 1-minute (60s) 9:16 vertical WhatsApp Status advertisement video featuring a 3D cartoon boy visually demonstrating every Baby Call Assistant feature."
   />
   <meta name="theme-color" content="#0A0B20" />
   <link rel="icon" type="image/svg+xml" href="./assets/baby-icon.svg" />
@@ -39,7 +39,17 @@
       aspect-ratio: 9 / 16;
       border-radius: 20px;
       display: block;
-      background: #07081A;
+      background: #060818;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: "JetBrains Mono", monospace;
     }
 
     .progress-track {
@@ -47,7 +57,7 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.12);
       overflow: hidden;
-      margin-top: 12px;
+      margin-top: 8px;
     }
 
     .progress-fill {
@@ -96,7 +106,7 @@
 
     .copy-area {
       width: 100%;
-      min-height: 165px;
+      min-height: 175px;
       background: rgba(6, 7, 20, 0.85);
       border: 1px solid rgba(139, 92, 246, 0.35);
       border-radius: 14px;
@@ -113,22 +123,31 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-top: 12px;
+      margin-top: 16px;
     }
 
     .scene-pill {
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 10px 12px;
+      border: 1px solid rgba(139, 92, 246, 0.28);
+      border-radius: 14px;
+      padding: 11px 13px;
       font-size: 0.82rem;
       color: var(--text-secondary);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .scene-pill:hover {
+      border-color: var(--cyan);
+      background: rgba(34, 211, 238, 0.12);
     }
 
     .scene-pill strong {
       display: block;
       color: var(--cyan);
-      margin-bottom: 2px;
+      margin-bottom: 3px;
+      font-family: "Space Grotesk", sans-serif;
     }
 
     @media (max-width: 860px) {
@@ -157,7 +176,7 @@
         <img src="./assets/baby-icon.svg" alt="Baby Assistant Logo" width="40" height="40" />
         <div>
           <span class="brand-name">Baby Assistant</span>
-          <span class="brand-sub">WhatsApp Status Promo Studio</span>
+          <span class="brand-sub">1-Min WhatsApp Status Video Studio</span>
         </div>
       </a>
 
@@ -169,37 +188,41 @@
 
   <main class="container">
     <div class="promo-layout">
-      <!-- Left: 9:16 Vertical WhatsApp Status Ad Player -->
+      <!-- Left: 9:16 Vertical 1-Minute WhatsApp Status Ad Player -->
       <div class="canvas-shell">
-        <canvas id="promo-canvas" width="720" height="1280" aria-label="Baby Assistant WhatsApp Status advertisement video preview"></canvas>
+        <canvas id="promo-canvas" width="720" height="1280" aria-label="Baby Assistant 1-minute WhatsApp Status advertisement video preview"></canvas>
+        <div class="progress-meta">
+          <span>9:16 HD • 7 Feature Scenes</span>
+          <span id="promo-time-label">0:00 / 1:00</span>
+        </div>
         <div class="progress-track">
           <div id="promo-progress-fill" class="progress-fill"></div>
         </div>
         <div id="promo-status" class="status-line">
-          Ready! Tap "Preview Ad" or "Download Video" for WhatsApp Status.
+          Ready! Tap "Preview Full 1-Min Ad" or "Download 1-Min Video".
         </div>
       </div>
 
-      <!-- Right: Controls, WhatsApp Caption & AI Video Prompt -->
+      <!-- Right: Controls, Clickable Feature Scenes, Caption & AI Video Prompt -->
       <div class="promo-controls">
         <div class="glass-card">
           <div class="pill-badge" style="margin-bottom: 12px;">
             <span class="pulse-dot" aria-hidden="true"></span>
-            <span>9:16 Vertical • 28 Seconds • WhatsApp Status Ready</span>
+            <span>9:16 Vertical • 1 Minute (60s) • All Features Explained Visually</span>
           </div>
           <h1 style="font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 10px;">
-            Cartoon Boy <span class="gradient-text">WhatsApp Status Ad</span>
+            1-Minute Cartoon Boy <span class="gradient-text">Full Feature Ad</span>
           </h1>
           <p style="color: var(--text-secondary); margin-bottom: 18px;">
-            Is 28-second animated advertisement mein hamara 3D cartoon boy graphically explain karta hai ki kaise neeche link dabakar <strong id="promo-site-url" style="color: var(--cyan);"></strong> se <strong>Baby Call Assistant</strong> download aur hands-free use karna hai.
+            Is 60-second animated advertisement mein 3D cartoon boy har feature ko animated phone screen par dikha-dikha kar explain karta hai — Auto-Mic, Call Answer/Ignore/Reject, Speaker &amp; Mute, Test Lab, Privacy aur <strong id="promo-site-url" style="color: var(--cyan);"></strong> se download + setup guide!
           </p>
 
           <div class="control-buttons">
             <button type="button" id="btn-play-preview" class="btn btn-secondary">
-              ▶ Preview Ad (28s)
+              ▶ Preview Full 1-Min Ad
             </button>
             <button type="button" id="btn-record-video" class="btn btn-primary">
-              ⬇ Download Video (28s WhatsApp Status)
+              ⬇ Download 1-Min Video (60s)
             </button>
           </div>
 
@@ -210,29 +233,44 @@
             </label>
           </div>
 
+          <p style="color: var(--text-muted); font-size: 0.82rem; margin: 16px 0 4px;">
+            Kisi bhi feature scene par tap karke direct preview dekhein:
+          </p>
           <div class="scene-list">
-            <div class="scene-pill">
-              <strong>0:00–0:06 • Scene 1</strong>
-              Cartoon boy hook: bike/busy hands mein bina touch call control
-            </div>
-            <div class="scene-pill">
-              <strong>0:06–0:14 • Scene 2</strong>
-              Incoming call par Auto-Mic ON + live Hinglish voice commands
-            </div>
-            <div class="scene-pill">
-              <strong>0:14–0:21 • Scene 3</strong>
-              3-Step visual guide: Download → Permissions → Bolkar Control
-            </div>
-            <div class="scene-pill">
-              <strong>0:21–0:28 • Scene 4</strong>
-              Animated 👇 arrows + "Neeche Link Dabakar Download Karein" CTA
-            </div>
+            <button type="button" class="scene-pill" data-jump-sec="0">
+              <strong>0:00–0:08 • Scene 1: Hook</strong>
+              Cartoon boy intro: bike/cooking/driving hands-free call control
+            </button>
+            <button type="button" class="scene-pill" data-jump-sec="8">
+              <strong>0:08–0:18 • Feature 1: Auto-Mic</strong>
+              Call aate hi bina tap mic ON + continuous ring listening
+            </button>
+            <button type="button" class="scene-pill" data-jump-sec="18">
+              <strong>0:18–0:28 • Feature 2: Call Control</strong>
+              Live demo: Answer, Negation-smart Ignore, &amp; Reject call
+            </button>
+            <button type="button" class="scene-pill" data-jump-sec="28">
+              <strong>0:28–0:37 • Feature 3: Audio</strong>
+              Active call par Speaker ON/OFF &amp; Mic Mute/Unmute demo
+            </button>
+            <button type="button" class="scene-pill" data-jump-sec="37">
+              <strong>0:37–0:45 • Feature 4: Test &amp; Privacy</strong>
+              Built-in Test Lab, Hindi/Hinglish/English &amp; 100% Privacy
+            </button>
+            <button type="button" class="scene-pill" data-jump-sec="45">
+              <strong>0:45–0:53 • Feature 5: Setup Guide</strong>
+              3 easy steps: Website Download → Permissions → Bolkar Control
+            </button>
+            <button type="button" class="scene-pill" data-jump-sec="53" style="grid-column: 1 / -1;">
+              <strong>0:53–1:00 • Scene 7: WhatsApp Status Download CTA</strong>
+              Cartoon boy + animated 👇 👇 👇 arrows pointing to your download link!
+            </button>
           </div>
         </div>
 
         <div class="glass-card">
           <h3>📱 WhatsApp Status Caption + Link (Copy-Paste)</h3>
-          <p>Video WhatsApp Status par lagate waqt yeh ready-made caption &amp; link neeche paste kar dein:</p>
+          <p>1-minute video WhatsApp Status par lagate waqt yeh ready caption &amp; link neeche paste kar dein:</p>
           <textarea id="whatsapp-caption-text" class="copy-area" readonly></textarea>
           <button type="button" id="btn-copy-caption" class="btn btn-secondary btn-compact">
             📋 Copy WhatsApp Caption &amp; Link
@@ -240,11 +278,11 @@
         </div>
 
         <div class="glass-card">
-          <h3>🎬 Bonus: AI Video Generator Prompt (Veo / Runway / Kling)</h3>
-          <p>Agar aap kisi AI lip-sync video generator (jaise Google Veo, Kling ya Runway) mein full cinematic 3D cartoon video banana chahein, to yeh ready prompt copy karein:</p>
+          <h3>🎬 Bonus: 1-Minute AI Video Generator Prompt (Veo / Runway / Kling)</h3>
+          <p>Agar aap kisi AI video generator mein full lip-sync 3D cartoon video bhi banana chahein, to yeh 60-second 7-scene prompt copy karein:</p>
           <textarea id="ai-video-prompt-text" class="copy-area" readonly></textarea>
           <button type="button" id="btn-copy-ai-prompt" class="btn btn-secondary btn-compact">
-            ✨ Copy AI Video Prompt
+            ✨ Copy 1-Min AI Video Prompt
           </button>
         </div>
       </div>

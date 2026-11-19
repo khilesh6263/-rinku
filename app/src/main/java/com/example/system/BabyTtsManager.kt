@@ -17,7 +17,7 @@ class BabyTtsManager(context: Context) : TextToSpeech.OnInitListener {
     private val appContext = context.applicationContext
     private var tts: TextToSpeech? = null
     private var isInitialized = false
-    private var pendingLocale: Locale = Locale("hi", "IN")
+    private var pendingLocale: Locale = Locale.forLanguageTag("hi-IN")
 
     private val _isSpeaking = MutableStateFlow(false)
     val isSpeaking: StateFlow<Boolean> = _isSpeaking.asStateFlow()
@@ -75,9 +75,9 @@ class BabyTtsManager(context: Context) : TextToSpeech.OnInitListener {
             return
         }
         val locale = when (language) {
-            AssistantLanguage.HINDI -> Locale("hi", "IN")
-            AssistantLanguage.HINGLISH -> Locale("hi", "IN")
-            AssistantLanguage.ENGLISH -> Locale("en", "IN")
+            AssistantLanguage.HINDI -> Locale.forLanguageTag("hi-IN")
+            AssistantLanguage.HINGLISH -> Locale.forLanguageTag("hi-IN")
+            AssistantLanguage.ENGLISH -> Locale.forLanguageTag("en-IN")
         }
         pendingLocale = locale
 

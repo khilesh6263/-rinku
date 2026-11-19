@@ -31,15 +31,11 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
         val app = context.applicationContext as? BabyAssistantApp ?: return
         val coordinator = app.container.coordinator
-        coordinator.onLiveCallStateChanged(newState)
+        val fgsError = coordinator.onLiveCallStateChanged(newState)
 
-        // On Android 14+, background apps cannot launch a microphone FGS directly.
-        // If the assistant is enabled but the FGS monitor isn't running, post a high-priority
-        // notification with a user-tap action (which is an official Android FGS exemption).
-        if (newState == CallLifecycleState.RINGING &&
-            coordinator.settings.value.isAssistantEnabled &&
-            !coordinator.isForegroundMonitorActive.value
-        ) {
+        // If Android 14+ restricted background FGS start when incoming call arrived,
+        // post a high-priority tap notification as a safe fallback.
+        if (newState == CallLifecycleState.RINGING && fgsError != null) {
             postIncomingCallPromptNotification(context)
         }
     }

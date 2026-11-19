@@ -25,6 +25,8 @@ class AssistantPreferencesRepository(private val context: Context) {
         val REQUIRE_WAKE_WORD = booleanPreferencesKey("require_wake_word")
         val CONFIRM_UNCERTAIN = booleanPreferencesKey("confirm_uncertain")
         val VOICE_FEEDBACK = booleanPreferencesKey("voice_feedback")
+        val AUTO_START_MIC_ON_CALL = booleanPreferencesKey("auto_start_mic_on_call")
+        val CONTINUOUS_RING_LISTENING = booleanPreferencesKey("continuous_ring_listening")
         val NOISE_SENSITIVITY = floatPreferencesKey("noise_sensitivity")
         val PREFER_OFFLINE = booleanPreferencesKey("prefer_offline")
         val SETUP_COMPLETED = booleanPreferencesKey("setup_completed")
@@ -40,6 +42,8 @@ class AssistantPreferencesRepository(private val context: Context) {
             requireWakeWord = prefs[Keys.REQUIRE_WAKE_WORD] ?: true,
             confirmUncertainActions = prefs[Keys.CONFIRM_UNCERTAIN] ?: true,
             voiceFeedbackEnabled = prefs[Keys.VOICE_FEEDBACK] ?: true,
+            autoStartMicOnIncomingCall = prefs[Keys.AUTO_START_MIC_ON_CALL] ?: true,
+            continuousRingListening = prefs[Keys.CONTINUOUS_RING_LISTENING] ?: true,
             noiseSensitivity = prefs[Keys.NOISE_SENSITIVITY] ?: 0.35f,
             preferOfflineRecognition = prefs[Keys.PREFER_OFFLINE] ?: false,
             hasCompletedSetupWizard = prefs[Keys.SETUP_COMPLETED] ?: false
@@ -64,6 +68,14 @@ class AssistantPreferencesRepository(private val context: Context) {
 
     suspend fun setVoiceFeedbackEnabled(enabled: Boolean) {
         context.assistantDataStore.edit { it[Keys.VOICE_FEEDBACK] = enabled }
+    }
+
+    suspend fun setAutoStartMicOnIncomingCall(enabled: Boolean) {
+        context.assistantDataStore.edit { it[Keys.AUTO_START_MIC_ON_CALL] = enabled }
+    }
+
+    suspend fun setContinuousRingListening(enabled: Boolean) {
+        context.assistantDataStore.edit { it[Keys.CONTINUOUS_RING_LISTENING] = enabled }
     }
 
     suspend fun setNoiseSensitivity(value: Float) {

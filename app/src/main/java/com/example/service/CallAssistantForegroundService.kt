@@ -42,20 +42,37 @@ class CallAssistantForegroundService : Service() {
         when (intent?.action) {
             ACTION_STOP_MONITOR -> {
                 coordinator.setForegroundMonitorActive(false)
-                coordinator.speechManager.stopListening()
+                coordinator.stopListening()
                 stopSelf()
                 return START_NOT_STICKY
             }
 
             ACTION_LISTEN_NOW -> {
-                startForegroundCompat()
+                val started = startForegroundCompat(isRinging = true)
+                if (!started) {
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
                 coordinator.setForegroundMonitorActive(true)
+                registerCallStateListener()
                 coordinator.startManualVoiceCommand(CommandSource.LIVE_CALL)
                 return START_STICKY
             }
 
+            ACTION_INCOMING_CALL_RINGING -> {
+                val started = startForegroundCompat(isRinging = true)
+                if (!started) {
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
+                coordinator.setForegroundMonitorActive(true)
+                registerCallStateListener()
+                coordinator.onIncomingCallMonitorReady()
+                return START_STICKY
+            }
+
             else -> {
-                val started = startForegroundCompat()
+                val started = startForegroundCompat(isRinging = false)
                 if (!started) {
                     stopSelf()
                     return START_NOT_STICKY
@@ -71,7 +88,7 @@ class CallAssistantForegroundService : Service() {
         super.onTimeout(startId)
         val coordinator = (application as? BabyAssistantApp)?.container?.coordinator
         coordinator?.setForegroundMonitorActive(false)
-        coordinator?.speechManager?.stopListening()
+        coordinator?.stopListening()
         stopSelf()
     }
 
@@ -83,8 +100,8 @@ class CallAssistantForegroundService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun startForegroundCompat(): Boolean {
-        val notification = buildMonitorNotification()
+    private fun startForegroundCompat(isRinging: Boolean): Boolean {
+        val notification = buildMonitorNotification(isRinging = isRinging)
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val hasRecordAudio = ContextCompat.checkSelfPermission(
@@ -173,7 +190,7 @@ class CallAssistantForegroundService : Service() {
         else -> CallLifecycleState.IDLE
     }
 
-    private fun buildMonitorNotification(): Notification {
+    private fun buildMonitorNotification(isRinging: Boolean): Notification {
         val openAppIntent = PendingIntent.getActivity(
             this,
             0,
@@ -199,15 +216,26 @@ class CallAssistantForegroundService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val title = if (isRinging) {
+            "Incoming Call — Baby Mic Listening"
+        } else {
+            "Baby Auto-Mic Armed"
+        }
+        val text = if (isRinging) {
+            "Speak \"Baby, call attend karo\" or \"call reject karo\"."
+        } else {
+            "Mic will turn on automatically as soon as an incoming call rings."
+        }
+
         return NotificationCompat.Builder(this, CHANNEL_MONITOR_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Baby Call Assistant Active")
-            .setContentText("Ready for incoming calls — mic activates only when a call rings.")
+            .setContentTitle(title)
+            .setContentText(text)
             .setOngoing(true)
             .setContentIntent(openAppIntent)
             .addAction(0, getString(R.string.action_listen_now), listenIntent)
             .addAction(0, getString(R.string.action_stop_assistant), stopIntent)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(if (isRinging) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_LOW)
             .build()
     }
 
@@ -242,5 +270,6 @@ class CallAssistantForegroundService : Service() {
         const val ACTION_START_MONITOR = "com.example.action.START_MONITOR"
         const val ACTION_STOP_MONITOR = "com.example.action.STOP_MONITOR"
         const val ACTION_LISTEN_NOW = "com.example.action.LISTEN_NOW"
+        const val ACTION_INCOMING_CALL_RINGING = "com.example.action.INCOMING_CALL_RINGING"
     }
 }

@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -66,12 +68,15 @@ fun SettingsScreen(
     onToggleWakeWord: (Boolean) -> Unit,
     onToggleConfirmUncertain: (Boolean) -> Unit,
     onToggleVoiceFeedback: (Boolean) -> Unit,
+    onToggleAutoStartMic: (Boolean) -> Unit,
+    onToggleContinuousRingListening: (Boolean) -> Unit,
     onTogglePreferOffline: (Boolean) -> Unit,
     onNoiseSensitivityChanged: (Float) -> Unit,
     onTestTtsGreeting: () -> Unit,
     onOpenSetupWizard: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
@@ -79,7 +84,8 @@ fun SettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .widthIn(max = 720.dp),
+                .widthIn(max = 720.dp)
+                .testTag("settings_scroll_list"),
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -179,6 +185,22 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
+
+                    SettingToggleRow(
+                        title = "Auto-Start Mic on Incoming Call",
+                        subtitle = "Automatically open SpeechRecognizer as soon as an incoming call rings (no tap needed)",
+                        checked = settings.autoStartMicOnIncomingCall,
+                        onCheckedChange = onToggleAutoStartMic,
+                        testTag = "toggle_auto_start_mic"
+                    )
+
+                    SettingToggleRow(
+                        title = "Keep Listening While Ringing",
+                        subtitle = "Automatically re-arm SpeechRecognizer if nothing is heard before the call ends",
+                        checked = settings.continuousRingListening,
+                        onCheckedChange = onToggleContinuousRingListening,
+                        testTag = "toggle_continuous_ring_listening"
+                    )
 
                     SettingToggleRow(
                         title = "Require Wake Word \"Baby\"",
@@ -312,6 +334,23 @@ fun SettingsScreen(
                         Icon(Icons.Rounded.Security, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Open Permission Setup Wizard")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = {
+                            runCatching {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .minimumInteractiveComponentSize()
+                            .testTag("settings_battery_optimization_button"),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text("Allow Unrestricted Background Battery")
                     }
                 }
             }

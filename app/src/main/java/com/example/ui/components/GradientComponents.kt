@@ -296,7 +296,7 @@ fun VoiceWaveformMeter(
     ) {
         for (i in 0 until barCount) {
             val weight = if (isActive) {
-                val wave = kotlin.math.abs(kotlin.math.sin(phase + i * 0.55f)).toFloat()
+                val wave = kotlin.math.abs(kotlin.math.sin((phase + i * 0.55f).toDouble())).toFloat()
                 (0.22f + (rmsLevel.coerceAtLeast(0.2f) * wave * 0.78f)).coerceIn(0.18f, 1f)
             } else {
                 0.18f

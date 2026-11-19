@@ -21,7 +21,9 @@ import com.example.domain.voice.VoiceFeedbackMessages
 import com.example.service.CallAssistantForegroundService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -67,6 +69,8 @@ class CallSessionCoordinator(
     val capabilityReport: StateFlow<DeviceCapabilityReport> = _capabilityReport.asStateFlow()
 
     private var ignoredCurrentRing = false
+    private var ringListenAttempt = 0
+    private var ringRetryJob: Job? = null
 
     init {
         scope.launch {
@@ -84,7 +88,16 @@ class CallSessionCoordinator(
         _isForegroundMonitorActive.value = active
     }
 
+    fun ensureMonitorRunningIfEnabled() {
+        val report = capabilityChecker.inspect()
+        _capabilityReport.value = report
+        if (_settings.value.isAssistantEnabled && report.hasRecordAudio && !_isForegroundMonitorActive.value) {
+            startMonitorServiceSafely(fromForegroundUi = true)
+        }
+    }
+
     fun toggleAssistantFromUi(enabled: Boolean): String? {
+        _settings.value = _settings.value.copy(isAssistantEnabled = enabled)
         scope.launch {
             preferencesRepository.setAssistantEnabled(enabled)
         }
@@ -92,20 +105,24 @@ class CallSessionCoordinator(
             val report = capabilityChecker.inspect()
             _capabilityReport.value = report
             if (!report.hasRecordAudio) {
-                "Grant Microphone permission in the Setup Wizard so Baby can listen during incoming calls."
+                "Grant Microphone permission in the Setup Wizard so Baby can listen automatically during incoming calls."
             } else {
                 startMonitorServiceSafely(fromForegroundUi = true)
             }
         } else {
+            ringRetryJob?.cancel()
             speechManager.cancelAndDestroy()
             stopMonitorService()
             null
         }
     }
 
-    fun startMonitorServiceSafely(fromForegroundUi: Boolean): String? {
+    fun startMonitorServiceSafely(
+        fromForegroundUi: Boolean,
+        action: String = CallAssistantForegroundService.ACTION_START_MONITOR
+    ): String? {
         val intent = Intent(appContext, CallAssistantForegroundService::class.java).apply {
-            action = CallAssistantForegroundService.ACTION_START_MONITOR
+            this.action = action
         }
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -128,31 +145,94 @@ class CallSessionCoordinator(
         _isForegroundMonitorActive.value = false
     }
 
-    fun onLiveCallStateChanged(newState: CallLifecycleState, callerInfo: String? = null) {
+    fun onLiveCallStateChanged(newState: CallLifecycleState, callerInfo: String? = null): String? {
         val previous = _callState.value
         _callState.value = newState
         if (callerInfo != null) {
             _callerDisplay.value = callerInfo
         }
 
+        var fgsError: String? = null
         if (newState == CallLifecycleState.RINGING && previous != CallLifecycleState.RINGING) {
             ignoredCurrentRing = false
+            ringListenAttempt = 0
+            ringRetryJob?.cancel()
             _pendingConfirmation.value = null
             classifier.resetDebounce()
 
-            if (_settings.value.isAssistantEnabled && _isForegroundMonitorActive.value && !ignoredCurrentRing) {
+            val currentSettings = _settings.value
+            if (currentSettings.isAssistantEnabled && currentSettings.autoStartMicOnIncomingCall) {
+                if (_isForegroundMonitorActive.value) {
+                    updateServiceNotification(isRinging = true)
+                    // FGS with microphone type is already active: immediately turn on SpeechRecognizer
+                    startCallRingListening(source = CommandSource.LIVE_CALL)
+                } else {
+                    fgsError = startMonitorServiceSafely(
+                        fromForegroundUi = false,
+                        action = CallAssistantForegroundService.ACTION_INCOMING_CALL_RINGING
+                    )
+                    if (fgsError != null) {
+                        // Fallback attempt in case app is in foreground or exempted
+                        startCallRingListening(source = CommandSource.LIVE_CALL)
+                    }
+                }
+            } else if (currentSettings.isAssistantEnabled && _isForegroundMonitorActive.value) {
                 promptAndListenForCall(source = CommandSource.LIVE_CALL)
             }
+        } else if (newState == CallLifecycleState.OFFHOOK) {
+            ringRetryJob?.cancel()
+            clearCallAlertNotification()
+            updateServiceNotification(isRinging = false)
         } else if (newState == CallLifecycleState.IDLE) {
             ignoredCurrentRing = false
+            ringListenAttempt = 0
+            ringRetryJob?.cancel()
             _callerDisplay.value = null
             _pendingConfirmation.value = null
             actionExecutor.pendingCallScreeningRejectHandler = null
+            clearCallAlertNotification()
             speechManager.stopListening()
+            updateServiceNotification(isRinging = false)
+        }
+        return fgsError
+    }
+
+    /**
+     * Called by CallAssistantForegroundService right after startForeground(..., MICROPHONE)
+     * succeeds for ACTION_INCOMING_CALL_RINGING, guaranteeing microphone FGS eligibility
+     * before invoking SpeechRecognizer.
+     */
+    fun onIncomingCallMonitorReady() {
+        val wasIdle = _callState.value != CallLifecycleState.RINGING
+        if (wasIdle) {
+            _callState.value = CallLifecycleState.RINGING
+            ignoredCurrentRing = false
+            ringListenAttempt = 0
+            ringRetryJob?.cancel()
+            _pendingConfirmation.value = null
+            classifier.resetDebounce()
+        }
+        clearCallAlertNotification()
+        val currentSettings = _settings.value
+        if (currentSettings.isAssistantEnabled && currentSettings.autoStartMicOnIncomingCall) {
+            if (!speechManager.isListening.value) {
+                startCallRingListening(source = CommandSource.LIVE_CALL)
+            }
+        } else if (currentSettings.isAssistantEnabled) {
+            promptAndListenForCall(source = CommandSource.LIVE_CALL)
+        }
+    }
+
+    private fun clearCallAlertNotification() {
+        try {
+            val nm = appContext.getSystemService(android.app.NotificationManager::class.java)
+            nm?.cancel(CallAssistantForegroundService.CALL_ALERT_NOTIFICATION_ID)
+        } catch (_: Exception) {
         }
     }
 
     fun startManualVoiceCommand(source: CommandSource = CommandSource.MANUAL_MIC) {
+        ringRetryJob?.cancel()
         val currentSettings = _settings.value
         ttsManager.stop()
         speechManager.startListening(
@@ -168,14 +248,90 @@ class CallSessionCoordinator(
         )
     }
 
+    private fun startCallRingListening(source: CommandSource) {
+        val currentSettings = _settings.value
+        if (ignoredCurrentRing) return
+
+        val isStillRinging = _callState.value == CallLifecycleState.RINGING ||
+            (_callState.value == CallLifecycleState.SIMULATED_RINGING && _simulationState.value.isRinging)
+        if (!isStillRinging) return
+
+        if (ringListenAttempt == 0) {
+            _lastOutcomeBanner.value = "Incoming call detected — microphone started automatically."
+        }
+
+        ttsManager.stop()
+        speechManager.startListening(
+            language = currentSettings.language,
+            preferOffline = currentSettings.preferOfflineRecognition,
+            source = source,
+            onResult = { transcript, confidence, resultSource ->
+                processTranscript(transcript, confidence, resultSource)
+            },
+            onError = { err ->
+                _lastOutcomeBanner.value = err
+                scheduleRingRetryIfActive(source)
+            }
+        )
+    }
+
+    private fun scheduleRingRetryIfActive(source: CommandSource) {
+        val currentSettings = _settings.value
+        if (!currentSettings.continuousRingListening || ignoredCurrentRing) return
+        val isStillRinging = when (source) {
+            CommandSource.LIVE_CALL -> _callState.value == CallLifecycleState.RINGING
+            CommandSource.TEST_MODE -> _callState.value == CallLifecycleState.SIMULATED_RINGING && _simulationState.value.isRinging
+            CommandSource.MANUAL_MIC -> false
+        }
+        if (!isStillRinging) return
+        if (ringListenAttempt >= MAX_RING_LISTEN_RETRIES) return
+
+        ringListenAttempt += 1
+        ringRetryJob?.cancel()
+        ringRetryJob = scope.launch {
+            delay(RING_RETRY_DELAY_MS)
+            if (!ttsManager.isSpeaking.value) {
+                startCallRingListening(source)
+            }
+        }
+    }
+
+    private fun updateServiceNotification(isRinging: Boolean) {
+        if (!_isForegroundMonitorActive.value) return
+        val intent = Intent(appContext, CallAssistantForegroundService::class.java).apply {
+            action = if (isRinging) {
+                CallAssistantForegroundService.ACTION_INCOMING_CALL_RINGING
+            } else {
+                CallAssistantForegroundService.ACTION_START_MONITOR
+            }
+        }
+        try {
+            appContext.startService(intent)
+        } catch (_: Exception) {
+        }
+    }
+
     fun stopListening() {
+        ringRetryJob?.cancel()
         speechManager.stopListening()
     }
 
     fun simulateIncomingCall() {
         classifier.resetDebounce()
+        ignoredCurrentRing = false
+        ringListenAttempt = 0
+        ringRetryJob?.cancel()
         _pendingConfirmation.value = null
         _callState.value = CallLifecycleState.SIMULATED_RINGING
+
+        val currentSettings = _settings.value
+        val hasMic = capabilityChecker.inspect().hasRecordAudio
+        val note = if (currentSettings.autoStartMicOnIncomingCall && hasMic) {
+            "Simulated incoming call ringing — mic turned ON automatically! Speak a command."
+        } else {
+            "Simulated incoming call ringing... Tap Mic or pick a test command."
+        }
+
         _simulationState.value = SimulationCallState(
             isRinging = true,
             isConnected = false,
@@ -183,18 +339,23 @@ class CallSessionCoordinator(
             isIgnored = false,
             isSpeakerOn = false,
             isMuted = false,
-            statusNote = "Simulated incoming call ringing... Tap Mic or pick a test command."
+            statusNote = note
         )
-        if (_settings.value.voiceFeedbackEnabled) {
+
+        if (currentSettings.autoStartMicOnIncomingCall && hasMic) {
+            startCallRingListening(CommandSource.TEST_MODE)
+        } else if (currentSettings.voiceFeedbackEnabled) {
             val prompt = VoiceFeedbackMessages.incomingCallPrompt(
                 _simulationState.value.callerLabel,
-                _settings.value.language
+                currentSettings.language
             )
-            ttsManager.speak(prompt, _settings.value.language)
+            ttsManager.speak(prompt, currentSettings.language)
         }
     }
 
     fun resetSimulation() {
+        ringRetryJob?.cancel()
+        speechManager.stopListening()
         _pendingConfirmation.value = null
         _callState.value = CallLifecycleState.IDLE
         _simulationState.value = SimulationCallState()
@@ -221,6 +382,7 @@ class CallSessionCoordinator(
 
         if (classification.isNoiseFiltered || classification.isDuplicate) {
             _lastOutcomeBanner.value = classification.reason
+            scheduleRingRetryIfActive(source)
             return
         }
 
@@ -279,6 +441,7 @@ class CallSessionCoordinator(
                 isSuccess = false,
                 language = currentSettings.language
             )
+            scheduleRingRetryIfActive(source)
             return
         }
 
@@ -301,6 +464,7 @@ class CallSessionCoordinator(
             return
         }
 
+        ringRetryJob?.cancel()
         executeIntentAndRespond(
             intent = classification.intent,
             transcript = transcript,
@@ -365,6 +529,7 @@ class CallSessionCoordinator(
         val isSuccess = result is ActionExecutionResult.Success || result is ActionExecutionResult.Ignored
         if (intent == CallCommandIntent.DO_NOT_ANSWER) {
             ignoredCurrentRing = true
+            ringRetryJob?.cancel()
             speechManager.stopListening()
         }
 
@@ -396,11 +561,11 @@ class CallSessionCoordinator(
             val prompt = VoiceFeedbackMessages.incomingCallPrompt(_callerDisplay.value, currentSettings.language)
             ttsManager.speak(prompt, currentSettings.language) {
                 if (_callState.value == CallLifecycleState.RINGING && !ignoredCurrentRing) {
-                    startManualVoiceCommand(source)
+                    startCallRingListening(source)
                 }
             }
         } else {
-            startManualVoiceCommand(source)
+            startCallRingListening(source)
         }
     }
 
@@ -440,5 +605,7 @@ class CallSessionCoordinator(
 
     companion object {
         private const val TAG = "CallSessionCoordinator"
+        private const val MAX_RING_LISTEN_RETRIES = 6
+        private const val RING_RETRY_DELAY_MS = 450L
     }
 }

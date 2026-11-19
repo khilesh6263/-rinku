@@ -15,13 +15,13 @@ An Android Jetpack Compose application that lets users manage incoming calls han
   - `SpeechRecognizer` for speech-to-text with live partial transcripts and RMS waveform levels.
   - `TextToSpeech` for Hindi/Hinglish/English spoken feedback (with anti-echo mic pausing).
   - `TelecomManager` (`acceptRingingCall()` on API 26+, `endCall()` on API 28+), `CallScreeningService` (API 29+), `TelephonyCallback` (API 31+) / `PhoneStateListener` (API 24–30), and `AudioManager` communication-device routing.
-  - `CallAssistantForegroundService` (`foregroundServiceType="microphone"`) compliant with Android 14+ foreground service rules and fallback notification actions.
+  - `CallAssistantForegroundService` (`foregroundServiceType="microphone"`) automatically activates `SpeechRecognizer` as soon as an incoming `RINGING` call state is detected (with continuous ring re-arming and Android 14+ notification fallback—no tap-to-speak needed).
 - **UI & Screens**:
-  - **Home Dashboard**: Master Voice Assistant toggle, incoming call status, animated mic orb, command cheat-sheet, and recent activity.
-  - **Test Lab**: Simulate incoming calls and test all voice commands (via live mic, presets, or custom phrases) without placing cellular calls.
+  - **Home Dashboard**: Master Voice Assistant toggle, Auto-Mic incoming call status, animated mic orb, command cheat-sheet, and recent activity.
+  - **Test Lab**: Simulate incoming calls (with automatic mic start) and test all voice commands (via live mic, presets, or custom phrases) without placing cellular calls.
   - **History**: Local Room database log of recognized commands and honest execution outcomes (no audio recordings stored or uploaded).
   - **Permission Setup Wizard**: Step-by-step interactive onboarding explaining Microphone, Phone State, Call Control, Call Screening Role, Notifications, and OEM battery rules before requesting.
-  - **Settings**: Language selector (`Hinglish`, `Hindi`, `English`), wake-word toggle, confirmation toggle, noise sensitivity slider, and Android API capability report.
+  - **Settings**: Language selector (`Hinglish`, `Hindi`, `English`), auto-start mic on incoming call & continuous ring listening toggles, wake-word toggle, confirmation toggle, noise sensitivity slider, battery optimization shortcut, and Android API capability report.
 
 ## Setup & Build Instructions (Local / GitHub)
 

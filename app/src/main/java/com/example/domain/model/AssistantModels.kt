@@ -81,6 +81,8 @@ data class AssistantSettings(
     val requireWakeWord: Boolean = true,
     val confirmUncertainActions: Boolean = true,
     val voiceFeedbackEnabled: Boolean = true,
+    val autoStartMicOnIncomingCall: Boolean = true,
+    val continuousRingListening: Boolean = true,
     val noiseSensitivity: Float = 0.35f,
     val preferOfflineRecognition: Boolean = false,
     val hasCompletedSetupWizard: Boolean = false

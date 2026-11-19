@@ -53,6 +53,10 @@ class AssistantViewModel(application: Application) : AndroidViewModel(applicatio
         coordinator.refreshCapabilities()
     }
 
+    fun ensureAssistantServiceIfEnabled() {
+        coordinator.ensureMonitorRunningIfEnabled()
+    }
+
     fun toggleAssistant(enabled: Boolean) {
         val warning = coordinator.toggleAssistantFromUi(enabled)
         _serviceWarningMessage.value = warning
@@ -104,6 +108,14 @@ class AssistantViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun setVoiceFeedbackEnabled(enabled: Boolean) {
         viewModelScope.launch { preferences.setVoiceFeedbackEnabled(enabled) }
+    }
+
+    fun setAutoStartMicOnIncomingCall(enabled: Boolean) {
+        viewModelScope.launch { preferences.setAutoStartMicOnIncomingCall(enabled) }
+    }
+
+    fun setContinuousRingListening(enabled: Boolean) {
+        viewModelScope.launch { preferences.setContinuousRingListening(enabled) }
     }
 
     fun setNoiseSensitivity(value: Float) {

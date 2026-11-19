@@ -98,6 +98,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.refreshCapabilities()
+        viewModel.ensureAssistantServiceIfEnabled()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -299,6 +300,8 @@ fun BabyAssistantRoot(viewModel: AssistantViewModel) {
                             onToggleWakeWord = viewModel::setRequireWakeWord,
                             onToggleConfirmUncertain = viewModel::setConfirmUncertainActions,
                             onToggleVoiceFeedback = viewModel::setVoiceFeedbackEnabled,
+                            onToggleAutoStartMic = viewModel::setAutoStartMicOnIncomingCall,
+                            onToggleContinuousRingListening = viewModel::setContinuousRingListening,
                             onTogglePreferOffline = viewModel::setPreferOfflineRecognition,
                             onNoiseSensitivityChanged = viewModel::setNoiseSensitivity,
                             onTestTtsGreeting = viewModel::testTtsGreeting,

@@ -25,12 +25,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.PhoneCallback
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.NotificationsActive
-import androidx.compose.material.icons.rounded.PhoneCallback
 import androidx.compose.material.icons.rounded.RecordVoiceOver
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Warning
@@ -392,7 +392,7 @@ fun HomeDashboardScreen(
                                     CallLifecycleState.RINGING,
                                     CallLifecycleState.SIMULATED_RINGING -> Icons.Rounded.NotificationsActive
                                     CallLifecycleState.OFFHOOK,
-                                    CallLifecycleState.SIMULATED_ACTIVE -> Icons.Rounded.PhoneCallback
+                                    CallLifecycleState.SIMULATED_ACTIVE -> Icons.AutoMirrored.Rounded.PhoneCallback
                                     CallLifecycleState.IDLE -> Icons.Rounded.Call
                                 },
                                 contentDescription = null,
@@ -412,10 +412,15 @@ fun HomeDashboardScreen(
                                 )
                                 Text(
                                     text = callerDisplay
-                                        ?: if (capabilityReport.isCallScreeningRoleHeld) {
-                                            "CallScreeningService + Telephony active"
-                                        } else {
-                                            "Telephony listener ready (Role optional)"
+                                        ?: when {
+                                            settings.isAssistantEnabled && settings.autoStartMicOnIncomingCall && isForegroundMonitorActive ->
+                                                "Auto-Mic ON — mic starts automatically on incoming call"
+                                            settings.isAssistantEnabled && settings.autoStartMicOnIncomingCall ->
+                                                "Auto-Mic Armed — keeps mic off until call rings"
+                                            capabilityReport.isCallScreeningRoleHeld ->
+                                                "CallScreeningService + Telephony active"
+                                            else ->
+                                                "Telephony listener ready (enable Auto-Mic in Settings)"
                                         },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextMuted
@@ -424,7 +429,11 @@ fun HomeDashboardScreen(
                         }
 
                         StatusPill(
-                            text = if (isForegroundMonitorActive) "LIVE" else "STANDBY",
+                            text = when {
+                                isForegroundMonitorActive && settings.autoStartMicOnIncomingCall -> "AUTO-MIC"
+                                isForegroundMonitorActive -> "LIVE"
+                                else -> "STANDBY"
+                            },
                             accentColor = if (isForegroundMonitorActive) EmeraldSuccess else TextMuted
                         )
                     }

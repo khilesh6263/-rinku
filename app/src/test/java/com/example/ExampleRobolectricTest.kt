@@ -94,5 +94,47 @@ class ExampleRobolectricTest {
         composeRule.onNodeWithTag("test_lab_scroll_list")
             .performScrollToNode(hasTestTag("simulate_incoming_call_button"))
         composeRule.onNodeWithText("SIMULATED CALL REJECTED").assertIsDisplayed()
+
+        // Navigate to Settings and verify Auto-Start Mic on Incoming Call toggle is displayed
+        composeRule.onNodeWithTag("nav_settings").performClick()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithTag("settings_scroll_list")
+            .performScrollToNode(hasTestTag("toggle_auto_start_mic"))
+        composeRule.onNodeWithTag("toggle_auto_start_mic").assertIsDisplayed()
+    }
+
+    @Test
+    fun `foreground service incoming call ringing automatically triggers speech recognition`() {
+        val app = ApplicationProvider.getApplicationContext<BabyAssistantApp>()
+        org.robolectric.Shadows.shadowOf(app).grantPermissions(
+            android.Manifest.permission.RECORD_AUDIO,
+            android.Manifest.permission.READ_PHONE_STATE
+        )
+
+        val coordinator = app.container.coordinator
+        coordinator.toggleAssistantFromUi(true)
+        coordinator.setForegroundMonitorActive(true)
+        coordinator.onLiveCallStateChanged(com.example.domain.model.CallLifecycleState.RINGING)
+
+        // Immediately activates ring listening without any manual tap
+        assertEquals(
+            com.example.domain.model.CallLifecycleState.RINGING,
+            coordinator.callState.value
+        )
+        assertEquals(
+            "Incoming call detected — microphone started automatically.",
+            coordinator.lastOutcomeBanner.value
+        )
+
+        // Drain Main Looper to confirm BabySpeechRecognizerManager.startListening() ran
+        org.robolectric.shadows.ShadowLooper.idleMainLooper()
+        org.junit.Assert.assertNotNull(coordinator.speechManager.statusMessage.value)
+
+        coordinator.onLiveCallStateChanged(com.example.domain.model.CallLifecycleState.IDLE)
+        org.robolectric.shadows.ShadowLooper.idleMainLooper()
+        assertEquals(
+            com.example.domain.model.CallLifecycleState.IDLE,
+            coordinator.callState.value
+        )
     }
 }

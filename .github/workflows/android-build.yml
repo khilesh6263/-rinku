@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK & Publish Website
 
 on:
   push:
@@ -6,6 +6,15 @@ on:
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages-and-apk"
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -58,8 +67,65 @@ jobs:
       - name: Build Debug APK & Run Tests
         run: gradle assembleDebug :app:testDebugUnitTest --no-daemon --stacktrace
 
-      - name: Upload Debug APK
+      - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v6
         with:
           name: baby-assistant-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+
+      - name: Prepare Public Download Website & APK Bundle
+        run: |
+          rm -rf _site
+          mkdir -p _site/downloads
+          cp -r docs/* _site/
+          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+          cp "$APK_PATH" _site/downloads/Baby-Assistant.apk
+          APK_SIZE=$(du -h "$APK_PATH" | cut -f1)
+          APK_SHA256=$(sha256sum "$APK_PATH" | awk '{print $1}')
+          UPDATED_AT=$(date -u +"%d %b %Y, %H:%M UTC")
+          cat > _site/downloads/release-info.json <<EOF
+          {
+            "appName": "Baby Assistant",
+            "version": "1.0",
+            "minAndroid": "Android 7.0+ (API 24)",
+            "packageId": "com.aistudio.babyvoice.xkmzqp",
+            "apkUrl": "./downloads/Baby-Assistant.apk",
+            "fallbackReleasesUrl": "https://github.com/${{ github.repository }}/releases",
+            "apkSize": "${APK_SIZE}",
+            "sha256": "${APK_SHA256}",
+            "updatedAt": "${UPDATED_AT}"
+          }
+          EOF
+
+      - name: Publish Public APK to GitHub Releases
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        run: |
+          if gh release view latest >/dev/null 2>&1; then
+            gh release upload latest _site/downloads/Baby-Assistant.apk --clobber
+          else
+            gh release create latest _site/downloads/Baby-Assistant.apk \
+              --title "Baby Assistant Latest APK" \
+              --notes "Latest automated Android build of Baby Assistant (Hands-Free Voice Call Assistant with Auto-Mic on Incoming Call)."
+          fi
+
+      - name: Upload GitHub Pages Website Artifact
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy-pages:
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Public Download Website to GitHub Pages
+        id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v5

@@ -47,3 +47,15 @@ An Android Jetpack Compose application that lets users manage incoming calls han
 - Install the APK on a physical Android device (Android 8.0+ recommended for `TelecomManager` call actions, Android 10+ for `CallScreeningService`).
 - Open **Permission Setup Wizard** inside the app to grant Microphone, Phone State, Answer Phone Calls, Call Screening Role, and Notification permissions.
 - On Android 14+ or Xiaomi/Oppo/Vivo/Samsung devices, keep the **Voice Assistant** toggle enabled from inside the app and allow unrestricted background battery usage so incoming call detection remains responsive.
+
+## Public APK Download Website (`docs/`)
+
+This repository includes a public responsive landing page in `docs/` (`index.html`, `styles.css`, `app.js`) with an interactive voice-command preview, Hinglish/English switch, 3-step Android install guide, and direct APK download button.
+
+### Publish Live on GitHub Pages (Free)
+1. Push this repository to GitHub (`main` branch).
+2. Open your GitHub repository → **Settings** → **Pages**.
+3. Under **Build and deployment → Source**, choose **GitHub Actions**.
+4. Every push to `main` automatically builds the latest `Baby-Assistant.apk`, publishes it to GitHub Releases, and deploys the live public website at:
+   `https://<your-github-username>.github.io/<repo-name>/`
+

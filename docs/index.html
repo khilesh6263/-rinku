@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Baby Assistant — Download Hands-Free Voice Call Assistant APK</title>
+  <meta
+    name="description"
+    content="Download Baby Assistant Android APK. Automatically activates microphone on incoming calls for hands-free Hindi, English, and Hinglish call answering, rejecting, speaker, and mute control."
+  />
+  <meta name="theme-color" content="#0A0B20" />
+  <link rel="icon" type="image/svg+xml" href="./assets/baby-icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#top" class="brand">
+        <img src="./assets/baby-icon.svg" alt="Baby Assistant Logo" width="40" height="40" />
+        <div>
+          <span class="brand-name">Baby Assistant</span>
+          <span class="brand-sub">Voice Call Assistant</span>
+        </div>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#features">Features</a>
+        <a href="#commands">Commands</a>
+        <a href="#install">Install Guide</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <div class="lang-toggle" role="group" aria-label="Language switch">
+          <button type="button" class="lang-btn active" data-lang="hinglish">Hinglish</button>
+          <button type="button" class="lang-btn" data-lang="english">English</button>
+        </div>
+        <a
+          href="https://github.com/khilesh6263/-babu/releases/latest/download/Baby-Assistant.apk"
+          class="btn btn-primary btn-compact"
+          data-apk-download
+          download="Baby-Assistant.apk"
+        >
+          Download APK
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="pill-badge">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span data-i18n="badge">Android 7.0+ • Auto-Mic on Incoming Call • 100% Free</span>
+          </div>
+
+          <h1 data-i18n="heroTitle">
+            Incoming Call Aate Hi Bas Bolo — <span class="gradient-text">“Baby, Call Attend Karo”</span>
+          </h1>
+
+          <p class="hero-desc" data-i18n="heroDesc">
+            Haath busy ho, bike chala rahe ho ya khana bana rahe ho — jaise hi incoming call aata hai, Baby Assistant ka mic automatically ON ho jata hai. Hindi, Hinglish ya English mein bolkar call attend, reject, speaker ON ya mute karein.
+          </p>
+
+          <div class="hero-cta-row">
+            <a
+              href="https://github.com/khilesh6263/-babu/releases/latest/download/Baby-Assistant.apk"
+              class="btn btn-primary"
+              data-apk-download
+              download="Baby-Assistant.apk"
+            >
+              <span aria-hidden="true">⬇</span>
+              <span data-i18n="downloadBtn">Download Baby Assistant APK</span>
+            </a>
+
+            <a href="#live-demo" class="btn btn-secondary">
+              <span aria-hidden="true">🎙</span>
+              <span data-i18n="tryDemoBtn">Live Demo Try Karein</span>
+            </a>
+          </div>
+
+          <div class="meta-strip">
+            <span>✅ No Login / No API Key</span>
+            <span>🔒 100% Private (No Audio Upload)</span>
+            <span>🇮🇳 Hindi + Hinglish + English</span>
+          </div>
+        </div>
+
+        <!-- Interactive Simulator -->
+        <div id="live-demo" class="phone-frame" aria-label="Interactive Baby Assistant demo">
+          <div class="phone-notch" aria-hidden="true"></div>
+          <div class="phone-header">
+            <span id="sim-status-pill" class="call-status-pill ringing">Incoming Call • Auto-Mic ON</span>
+            <p class="caller-name">Mom (+91 98••• ••210)</p>
+            <p class="caller-sub">Interactive Website Preview</p>
+          </div>
+
+          <div class="orb-stage">
+            <div class="orb-ring">
+              <div class="orb-inner">
+                <img src="./assets/baby-icon.svg" alt="Baby Listening Orb" />
+              </div>
+            </div>
+            <div class="wave-bars" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+
+          <div class="sim-response" aria-live="polite">
+            <strong id="sim-response-title">Baby Mic Automatically Listening...</strong>
+            <span id="sim-response-text">
+              Incoming call detect hote hi mic ON ho gaya. Neeche kisi bhi command par tap karke response dekhein!
+            </span>
+          </div>
+
+          <div class="demo-chips">
+            <button type="button" class="chip-btn" data-sim="answer">📞 "Baby, call attend karo"</button>
+            <button type="button" class="chip-btn" data-sim="ignore">🔕 "Baby, attend mat karo"</button>
+            <button type="button" class="chip-btn" data-sim="reject">❌ "Baby, call reject karo"</button>
+            <button type="button" class="chip-btn" data-sim="speaker">🔊 "Baby, speaker on karo"</button>
+            <button type="button" class="chip-btn" data-sim="mute">🔇 "Baby, mute karo"</button>
+            <button type="button" class="chip-btn" data-sim="ringing">🔄 Reset Incoming Call</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag" data-i18n="featuresTag">Key Features</div>
+          <h2 data-i18n="featuresTitle">Full Hands-Free Call Control — Bina Screen Touch Kiye</h2>
+          <p data-i18n="featuresSub">
+            Fast on-device command engine jo Hindi, English aur Hinglish samajhta hai — koi login, subscription ya API key nahi chahiye.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="glass-card">
+            <div class="icon-box" aria-hidden="true">🎙️</div>
+            <h3>Auto-Mic on Incoming Call</h3>
+            <p>
+              Call ring hote hi Foreground Service automatically SpeechRecognizer ON kar deti hai — koi button tap karne ki zarurat nahi.
+            </p>
+          </article>
+
+          <article class="glass-card">
+            <div class="icon-box" aria-hidden="true">🇮🇳</div>
+            <h3>Hindi, Hinglish &amp; English</h3>
+            <p>
+              “Baby, call utha lo”, “Baby, call attend mat karo”, aur “Baby, answer the call” sabhi natural bolchal ko turant samajhta hai.
+            </p>
+          </article>
+
+          <article class="glass-card">
+            <div class="icon-box" aria-hidden="true">🔁</div>
+            <h3>Continuous Ring Listening</h3>
+            <p>
+              Agar pehle 1–2 second mein aawaz miss ho jaye to ring bajte rehne tak mic automatically dobara listen karta rehta hai.
+            </p>
+          </article>
+
+          <article class="glass-card">
+            <div class="icon-box" aria-hidden="true">🔊</div>
+            <h3>Speaker &amp; Mute Control</h3>
+            <p>
+              Call ke dauran sirf bolkar loudspeaker ON/OFF aur microphone mute/unmute control kar sakte hain.
+            </p>
+          </article>
+
+          <article class="glass-card">
+            <div class="icon-box" aria-hidden="true">🧪</div>
+            <h3>Built-in Test Lab</h3>
+            <p>
+              Bina real cellular call kiye app ke andar hi incoming call simulate karke apne mic aur commands test karein.
+            </p>
+          </article>
+
+          <article class="glass-card">
+            <div class="icon-box" aria-hidden="true">🔒</div>
+            <h3>100% On-Device Privacy</h3>
+            <p>
+              Koi voice recording save ya server par upload nahi hoti. Sirf local command history aapke phone mein rehti hai.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Supported Commands -->
+    <section id="commands" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag" data-i18n="commandsTag">Voice Commands</div>
+          <h2 data-i18n="commandsTitle">Natural Hindi, Hinglish aur English Commands</h2>
+          <p data-i18n="commandsSub">
+            Negation-smart engine: “call attend mat karo” aur “call attend karo” mein kabhi confuse nahi hota.
+          </p>
+        </div>
+
+        <div class="commands-grid">
+          <article class="glass-card command-card">
+            <div class="command-header">
+              <h3>Answer Incoming Call</h3>
+              <span class="intent-badge">ANSWER_CALL</span>
+            </div>
+            <div class="phrase-list">
+              <span class="phrase-pill">“Baby, call attend karo.”</span>
+              <span class="phrase-pill">“Baby, call utha lo.”</span>
+              <span class="phrase-pill">“Baby, answer the call.”</span>
+              <span class="phrase-pill">“बेबी, कॉल अटेंड करो”</span>
+            </div>
+          </article>
+
+          <article class="glass-card command-card">
+            <div class="command-header">
+              <h3>Do Not Answer (Ignore)</h3>
+              <span class="intent-badge warn">DO_NOT_ANSWER</span>
+            </div>
+            <div class="phrase-list">
+              <span class="phrase-pill">“Baby, call attend mat karo.”</span>
+              <span class="phrase-pill">“Baby, call mat uthao.”</span>
+              <span class="phrase-pill">“Baby, do not answer.”</span>
+              <span class="phrase-pill">“बेबी, कॉल मत उठाओ”</span>
+            </div>
+          </article>
+
+          <article class="glass-card command-card">
+            <div class="command-header">
+              <h3>Reject / Decline Call</h3>
+              <span class="intent-badge danger">REJECT_CALL</span>
+            </div>
+            <div class="phrase-list">
+              <span class="phrase-pill">“Baby, call reject karo.”</span>
+              <span class="phrase-pill">“Baby, call kaat do.”</span>
+              <span class="phrase-pill">“Baby, decline the call.”</span>
+              <span class="phrase-pill">“बेबी, कॉल रिजेक्ट करो”</span>
+            </div>
+          </article>
+
+          <article class="glass-card command-card">
+            <div class="command-header">
+              <h3>Speaker &amp; Mic Control</h3>
+              <span class="intent-badge">AUDIO_CONTROL</span>
+            </div>
+            <div class="phrase-list">
+              <span class="phrase-pill">“Baby, speaker on karo.”</span>
+              <span class="phrase-pill">“Baby, speaker off karo.”</span>
+              <span class="phrase-pill">“Baby, mute karo.”</span>
+              <span class="phrase-pill">“Baby, mute hatao.”</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-Step Install Guide -->
+    <section id="install" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag" data-i18n="installTag">Install Guide</div>
+          <h2 data-i18n="installTitle">3 Easy Steps Mein Phone Par Install Karein</h2>
+          <p data-i18n="installSub">
+            Direct Android APK download — bas 1 minute mein setup complete ho jata hai.
+          </p>
+        </div>
+
+        <div class="steps-grid">
+          <article class="glass-card">
+            <div class="step-num">1</div>
+            <h3>APK Download Karein</h3>
+            <p>
+              <strong>Download Baby Assistant APK</strong> button par tap karein. File seedha aapke phone ke <code>Downloads</code> folder mein save ho jayegi.
+            </p>
+          </article>
+
+          <article class="glass-card">
+            <div class="step-num">2</div>
+            <h3>Unknown Apps Allow Karein</h3>
+            <p>
+              Downloaded <code>Baby-Assistant.apk</code> par tap karein. Agar Android puche to Chrome/Files ke liye <strong>Allow from this source</strong> ON karke <strong>Install</strong> dabayein.
+            </p>
+          </article>
+
+          <article class="glass-card">
+            <div class="step-num">3</div>
+            <h3>Permissions &amp; Auto-Mic ON</h3>
+            <p>
+              App kholkar <strong>Permission Setup Wizard</strong> complete karein, <strong>Voice Assistant</strong> toggle ON karein, aur Android 14+ par Battery ko <strong>Unrestricted</strong> set karein.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download & Verification Box -->
+    <section id="download" class="section">
+      <div class="container">
+        <div class="download-box">
+          <div>
+            <h2 data-i18n="downloadBoxTitle">Latest Official Android APK Download Karein</h2>
+            <p style="color: var(--text-secondary); margin: 0;" data-i18n="downloadBoxSub">
+              Har naye GitHub build ke saath yahan latest verified Baby Assistant APK automatically update hota hai.
+            </p>
+
+            <div class="spec-list">
+              <div class="spec-item">
+                <span class="spec-label">Version</span>
+                <span class="spec-value mono" id="spec-version">v1.0</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Android Support</span>
+                <span class="spec-value">Android 7.0+ (API 24–36)</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">APK File Size</span>
+                <span class="spec-value mono" id="spec-size">Auto-updated</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Updated</span>
+                <span class="spec-value" id="spec-updated">Latest release</span>
+              </div>
+              <div class="spec-item" style="grid-column: 1 / -1;">
+                <span class="spec-label">Package ID &amp; SHA-256</span>
+                <span class="spec-value mono">com.aistudio.babyvoice.xkmzqp • <span id="spec-sha256">Verified in CI</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="download-actions">
+            <div class="qr-card" aria-label="QR code for direct APK download">
+              <div class="qr-frame">
+                <div
+                  id="apk-qr-code"
+                  class="qr-code-box"
+                  role="img"
+                  aria-label="Scan QR code to download Baby Assistant APK"
+                ></div>
+              </div>
+              <div class="qr-caption">
+                <strong data-i18n="qrTitle">Scan to Download on Phone</strong>
+                <span data-i18n="qrDesc">Phone camera se scan karein aur seedha APK download karein</span>
+                <button type="button" id="copy-apk-url-btn" class="qr-copy-btn">
+                  <span aria-hidden="true">📋</span>
+                  <span data-i18n="copyApkBtn">Copy Direct APK Link</span>
+                </button>
+              </div>
+            </div>
+
+            <a
+              href="https://github.com/khilesh6263/-babu/releases/latest/download/Baby-Assistant.apk"
+              class="btn btn-primary"
+              data-apk-download
+              download="Baby-Assistant.apk"
+            >
+              <span aria-hidden="true">⬇</span>
+              <span data-i18n="downloadBtn">Download Baby Assistant APK</span>
+            </a>
+
+            <button type="button" id="share-site-btn" class="btn btn-secondary">
+              <span aria-hidden="true">📤</span>
+              <span data-i18n="shareBtn">Website Link Share Karein</span>
+            </button>
+
+            <a
+              href="https://github.com/khilesh6263/-babu/releases"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-secondary"
+              data-releases-link
+            >
+              <span aria-hidden="true">📦</span>
+              <span data-i18n="releasesBtn">GitHub Releases Dekhein</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag" data-i18n="faqTag">FAQ</div>
+          <h2 data-i18n="faqTitle">Aam Sawaal (Questions &amp; Answers)</h2>
+        </div>
+
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary>Kya is app ke liye API key, Firebase ya login chahiye?</summary>
+            <p>
+              Nahi! Baby Assistant 100% free aur standalone hai. Isme Android ka built-in SpeechRecognizer, TextToSpeech, aur TelecomManager use hota hai — koi account ya API key setup nahi karna padhta.
+            </p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Incoming call aate hi mic automatically kaise ON hota hai?</summary>
+            <p>
+              Jab aap app ke andar Voice Assistant toggle ON rakhte hain, to app ki Microphone Foreground Service armed rehti hai. Call ring hote hi bina button dabaye mic listen start kar deta hai. Android 14+ par best performance ke liye Settings mein Battery Optimization ko Unrestricted set karein.
+            </p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Install karte waqt Google Play Protect warning aaye to kya karein?</summary>
+            <p>
+              Kyunki yeh APK direct website / GitHub se download kiya jata hai (Play Store ke bahar), Android pehli baar confirm karta hai. Aap <strong>More details → Install anyway</strong> select karke safely install kar sakte hain.
+            </p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Kya meri call audio ya awaaz record ya upload hoti hai?</summary>
+            <p>
+              Bilkul nahi. Baby Assistant koi audio file record ya cloud par upload nahi karta. Sirf recognized command ka text log aapke phone ke local storage mein dikhta hai, jise aap kabhi bhi delete kar sakte hain.
+            </p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <strong style="color: var(--text-primary);">Baby Assistant</strong> — Hands-Free Hindi, Hinglish &amp; English Call Assistant for Android.
+      </div>
+      <div class="footer-links">
+        <a href="#features">Features</a>
+        <a href="#install">Install Guide</a>
+        <a href="https://github.com/khilesh6263/-babu/releases" target="_blank" rel="noopener noreferrer" data-releases-link>Releases</a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" defer></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>

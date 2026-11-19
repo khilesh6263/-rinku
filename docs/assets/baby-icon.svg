@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#0A0B20"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="16" y1="16" x2="112" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22D3EE"/>
+      <stop offset="55%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+    <linearGradient id="mic" x1="48" y1="30" x2="80" y2="94" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#BAE6FD"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#bg)"/>
+  <circle cx="64" cy="64" r="46" stroke="url(#ring)" stroke-width="4" stroke-opacity="0.9"/>
+  <circle cx="64" cy="64" r="36" fill="#7C3AED" fill-opacity="0.18"/>
+  <rect x="52" y="34" width="24" height="38" rx="12" fill="url(#mic)"/>
+  <path d="M41 62C41 74.7025 51.2975 85 64 85C76.7025 85 87 74.7025 87 62" stroke="#22D3EE" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M64 85V96" stroke="#22D3EE" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M52 96H76" stroke="#22D3EE" stroke-width="5.5" stroke-linecap="round"/>
+  <circle cx="96" cy="34" r="5" fill="#22D3EE"/>
+</svg>
